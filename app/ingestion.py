@@ -11,6 +11,8 @@ parent_dir = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(parent_dir)
 VECTOR_STORE_DIR = os.path.join(ROOT_DIR, os.environ["VECTOR_STORE_FOLDER"])
 
+SUPPORTED_FORMATS = ["pdf"]
+
 def convert_file_to_hash(file_path: str) -> str:
     """Returns SHA256 hash of a file"""
     with open(file_path, "rb") as f:
@@ -44,7 +46,7 @@ def get_file_list(folder_name: str):
     try:
         folder_path = os.path.join(ROOT_DIR, folder_name)
         files = os.listdir(folder_path)
-        return [file for file in files if file.split(".")[-1] in ["pdf", "csv"]]
+        return [file for file in files if file.split(".")[-1] in SUPPORTED_FORMATS]
     except FileNotFoundError as e:
         return []
 
