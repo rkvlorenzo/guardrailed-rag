@@ -1,5 +1,6 @@
 import hashlib
 import os
+from functools import lru_cache
 
 import pdfplumber
 from langchain_community.vectorstores import FAISS
@@ -80,3 +81,16 @@ def convert_files_to_vector():
 
     return global_vector_store
 
+@lru_cache(maxsize=1)
+def get_global_vector():
+    return convert_files_to_vector()
+
+
+def get_retriever(k=4, search_type="mmr"):
+    return get_global_vector().as_retriever(
+        search_type=search_type,
+        search_kwargs={"k": k}
+    )
+
+def initialize_vector():
+    get_global_vector()

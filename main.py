@@ -1,32 +1,53 @@
 from dotenv import load_dotenv
+from rich.align import Align
+from rich.panel import Panel
+from rich.text import Text
+
 load_dotenv()
+
+def generate_welcome_panel():
+    welcome_text = Text()
+    welcome_text.append("Welcome to RAGuard!\n", style="bold green")
+    welcome_text.append("Your AI-powered retrieval assistant.\n", style="italic cyan")
+    welcome_text.append("Type 'exit' or 'quit' to leave.\n", style="yellow")
+
+    panel = Panel(
+        Align.center(welcome_text, vertical="middle"),
+        title="[bold magenta] RAGuard CLI [/bold magenta]",
+        border_style="bright_blue",
+        padding=(1, 5),
+        expand=False
+    )
+
+    return panel
 
 def main():
     from rich.console import Console
-    from app.ingestion import convert_files_to_vector
-    from app.rag_pipeline import evaluation_temp
+    from app.rag_pipeline import rag_pipeline_response
+    from app.ingestion import initialize_vector
 
     console = Console()
-    console.print("[bold green]Welcome to RAGuard! [/bold green] [italic]Type 'exit' or 'quit' to leave.[/italic]")
+    console.print(generate_welcome_panel())
 
-    with console.status(f"[bold yellow]Loading documents and building vector store, please wait......[/bold yellow]",
-                        spinner="dots"):
-        global_vector = convert_files_to_vector()
-        retriever = global_vector.as_retriever(
-            search_type="mmr",
-            search_kwargs={"k": 4}
-        )
+    with console.status(
+        "[bold yellow]Loading documents and building vector store, please wait...[/bold yellow]",
+        spinner="dots"
+    ):
+        initialize_vector()
 
     while True:
-        user_input = console.input("[bold blue]Enter your question: [/bold blue]")
+        user_input = console.input("\n[bold blue]Enter your question: [/bold blue]")
         if user_input.lower() in ["exit", "quit"]:
-            console.print("[bold red]Thanks for using RAGuard![/bold red]")
+            console.print("\n[bold red]Thanks for using RAGuard![/bold red]")
             break
 
-        # response = rag_pipeline_response(user_input=user_input, retriever=retriever)
-        x, response = evaluation_temp(user_input=user_input, retriever=retriever)
-        console.print(f"[bold magenta]RAGuard: [/bold magenta] {response}")
-        console.print(f"[bold magenta]RAGuard: [/bold magenta] {x}")
+        with console.status(
+            "[bold green]Generating answer...[/bold green]",
+            spinner="dots"
+        ):
+            response = rag_pipeline_response(user_input=user_input)
+        console.print(f"\n[bold magenta]RAGuard: [/bold magenta] {response}")
+
 
 
 if __name__ == "__main__":

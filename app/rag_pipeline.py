@@ -3,17 +3,16 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI
 
-from app.evaluator import evaluate_answer
+from app.evaluator import evaluate
+from app.ingestion import get_retriever
+from app.utils import watcher
 
 
-def evaluation_temp(user_input: str, retriever):
-    answer = rag_pipeline_response(user_input=user_input, retriever=retriever)
-    return evaluate_answer(user_input, answer,retriever)
-
-
-def rag_pipeline_response(user_input: str, retriever):
+@watcher(evaluate)
+def rag_pipeline_response(user_input: str, model: str = "gpt-4o-mini"):
+    retriever = get_retriever()
     llm = ChatOpenAI(
-        model="gpt-4o-mini",
+        model=model,
         temperature=0.3,
         max_tokens=1000
     )

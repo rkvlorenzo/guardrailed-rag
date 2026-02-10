@@ -1,36 +1,22 @@
+import json
+
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
+from app.ingestion import get_retriever
 
-def get_eval_prompt(context, question, answer):
-    return f"""
-        Guidelines:
-        1. Check if the answer is **grounded** in the context. Only information explicitly in the context counts.
-        2. Check if the answer is **relevant** to the question.
-        3. Identify if there is any **hallucination** or invented information.
-        4. Assign a **confidence score** between 0 and 1 (1 = fully confident, 0 = not confident).
-        5. Be concise and structured. Respond in **JSON format** exactly like this:
-        
-        Format it in JSON format with the following keys/value:
-        1. grounded: true/false,
-        2. relevance: high/medium/low,
-        3. hallucination_risk: low/medium/high,
-        4. confidence_score: 0.xx
-        
-        Context:
-        {context}
-        
-        Question:
-        {question}
-        
-        Answer:
-        {answer}
-    """
+def evaluate(args, kwargs, result):
+    user_input = args[0] if args else kwargs.get("user_input")
+    retriever = get_retriever()
+    evaluation = evaluate_answer(user_input=user_input,
+                    answer=result,
+                    retriever=retriever)
+    formatted_evaluation = json.loads(evaluation)
 
-def evaluate_answer(user_input, answer, retriever):
+def evaluate_answer(user_input, answer, retriever, model="gpt-3.5-turbo"):
     llm = ChatOpenAI(
-        model="gpt-3.5-turbo",
+        model=model,
         temperature=0.3,
         max_tokens=1000
     )
@@ -75,4 +61,4 @@ def evaluate_answer(user_input, answer, retriever):
         "question": user_input,
         "answer": answer
     })
-    return evaluation, answer
+    return evaluation
