@@ -3,7 +3,7 @@ Dockerized **RAG (Retrieval-Augmented Generation)** system with persistent FAISS
 
 # Features
 
-- Ingest **PDFs or CSVs** and convert them into a persistent FAISS vector store
+- Ingest **PDFs** and convert them into a persistent FAISS vector store
 - **RAG pipeline** using LangChain + OpenAI embeddings for context-aware answers
 - **Evaluator LLM** checks each response for:
   - `grounded` – is the answer supported by context?
@@ -28,13 +28,14 @@ DOCS_FOLDER=docs
 VECTOR_STORE_FOLDER=vector_store
 OPENAI_API_KEY=<api_key>
 ```
+### 3. Create docs and vector_store folders
 
-### 3. Install dependencies
+### 4. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Run the CLI
+### 5. Run the CLI
 ```bash
 python main.py
 ```
